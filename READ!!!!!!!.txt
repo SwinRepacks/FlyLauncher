@@ -1,0 +1,15 @@
+Ru | https://github.com/Fly-Visuals
+
+Для игры вам понадобиться:
+	1. Установить сам лаунчер с офф сайта https://flyvisuals.net/api/v1/client/launcher/download
+	2. Установить Node.js (https://nodejs.org/) и mitmproxy(https://www.mitmproxy.org/)
+	3. Запустить FlyLauncher.bat от имени администратора
+En | https://github.com/Fly-Visuals
+
+For the game, you will need:
+	1. Install the launcher itself from the official website https://flyvisuals.net/api/v1/client/launcher/download
+	2. Install Node.js (https://nodejs.org/) and mitmproxy (https://www.mitmproxy.org/)
+	3. Run FlyLauncher.bat as an administrator
+
+
+Хорошей игры! | Good game!
