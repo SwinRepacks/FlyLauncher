@@ -35,15 +35,34 @@ if not exist "%ASAR%" (
 )
 echo [OK] Лаунчер найден
 
+:: ============================================================
+:: Проверка и скачивание mitmproxy
+:: ============================================================
+set "MITM_CMD=mitmdump"
 where mitmdump >nul 2>&1
-if %errorLevel% neq 0 ( echo [ОШИБКА] mitmproxy не найден & pause & exit /b 1 )
-echo [OK] mitmproxy найден
+if %errorLevel% neq 0 (
+    if exist "%LOCALAPPDATA%\mitmproxy\mitmdump.exe" (
+        set "MITM_CMD=%LOCALAPPDATA%\mitmproxy\mitmdump.exe"
+    ) else (
+        echo [*] mitmproxy не найден в системе. Скачиваю...
+        powershell -Command "Invoke-WebRequest -Uri 'https://snapshots.mitmproxy.org/12.3.1/mitmproxy-12.3.1-windows-x86_64.zip' -OutFile '%TEMP%\mitm.zip'"
+        if not exist "%TEMP%\mitm.zip" (
+            echo [ОШИБКА] Не удалось скачать mitmproxy. Проверьте интернет.
+            pause & exit /b 1
+        )
+        echo [*] Распаковываю mitmproxy в %LOCALAPPDATA%\mitmproxy...
+        powershell -Command "Expand-Archive -Path '%TEMP%\mitm.zip' -DestinationPath '%LOCALAPPDATA%\mitmproxy' -Force"
+        set "MITM_CMD=%LOCALAPPDATA%\mitmproxy\mitmdump.exe"
+    )
+)
+echo [OK] mitmproxy найден или скачан
 
+:: Проверка asar
 where asar >nul 2>&1
 if %errorLevel% neq 0 (
     echo [*] Устанавливаю asar...
     npm install -g @electron/asar
-    if %errorLevel% neq 0 ( echo [ОШИБКА] npm не найден & pause & exit /b 1 )
+    if %errorLevel% neq 0 ( echo [ОШИБКА] npm не найден. Установите Node.js. & pause & exit /b 1 )
 )
 echo [OK] asar найден
 
@@ -67,7 +86,7 @@ if not errorlevel 1 (
 )
 
 echo [*] Генерирую CA (жду 10 секунд)...
-start "" /b mitmdump -p 18765
+start "" /b "%MITM_CMD%" -p 18765
 timeout /t 10 /nobreak >nul
 taskkill /f /im mitmdump.exe >nul 2>&1
 timeout /t 2 /nobreak >nul
@@ -245,7 +264,7 @@ echo [OK] fly_bypass.py создан
 
 :: Запуск mitmdump
 echo [*] Запускаю mitmdump...
-start "MitmProxy" cmd /k "mitmdump -p 8080 -s \"%BYPASS_PY%\""
+start "MitmProxy" cmd /k ""%MITM_CMD%" -p 8080 -s "%BYPASS_PY%""
 timeout /t 5 /nobreak >nul
 
 :: Запуск лаунчера
